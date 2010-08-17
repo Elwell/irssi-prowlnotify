@@ -5,10 +5,6 @@ use warnings;
 #
 # Version history
 #
-# 0.4
-#	Push hilights
-# 0.3
-#	Add ability to toggle prowl mode (on/off/auto)
 # 0.2
 #	Modify to use new API keys, much better!
 # 0.1
@@ -36,7 +32,6 @@ $VERSION = "0.2";
 
 $config{away_level} = 0;
 $config{awayreason} = 'Auto-away because client has disconnected from proxy.';
-$config{mode} = 'auto';
 $config{debug} = 0;
 $config{clientcount} = 0;
 
@@ -52,11 +47,6 @@ sub debug
 sub send_prowl
 {
 	my ($event, $text) = @_;
-
-	if ($config{mode} eq 'off') {
-		debug("Not sending notification, prowl is off.");
-		return;
-	}
 
 	debug("Sending prowl");
 
@@ -151,7 +141,7 @@ sub msg_pub
 {
 	my ($server, $data, $nick, $mask, $target) = @_;
 	 
-	if (($server->{usermode_away} == "1" || $config{mode} eq 'on')  && ($data =~ /$server->{nick}/i)) {
+	if ($server->{usermode_away} == "1" && $data =~ /$server->{nick}/i) {
 		debug("Got pub msg with my name");
 		send_prowl ("Mention", $nick . ': ' . $data);
 	}
@@ -160,54 +150,8 @@ sub msg_pub
 sub msg_pri
 {
 	my ($server, $data, $nick, $address) = @_;
-	if ($server->{usermode_away} == "1" || $config{mode} eq 'on') {
+	if ($server->{usermode_away} == "1") {
 		send_prowl ("Private msg", $nick . ': ' . $data);
-	}
-}
-
-sub msg_hilight
-{
-	my ($dest, $text, $stripped) = @_;
-
-	my $server = $dest->{server};
-
-	if ($dest->{level} & MSGLEVEL_HILIGHT) {
-		if ($server->{usermode_away} == "1" || $config{mode} eq 'on') {
-			send_prowl ("Highlight", $stripped);
-		}
-	}
-}
-
-sub cmd_prowl
-{
-	my ($args, $server, $winit) = @_;
-
-	$args = lc($args);
-
-	if (
-		$args =~ /^auto$/ ||
-		$args =~ /^on$/ ||
-		$args =~ /^off$/
-	) {
-		if ($args eq $config{mode}) {
-			Irssi::print("Prowl mode already $args");
-		} else {
-			Irssi::print("Prowl mode: $args (was " . $config{mode} . ')' );
-			$config{mode} = $args;
-		}
-	} elsif ($args =~/^test$/) {
-		Irssi::print("Sending test prowl notification");
-		send_prowl ("Test", "If you can read this, it worked.");
-	} elsif ($args =~/^debug$/) {
-		if ($config{debug}) {
-			$config{debug} = 0;
-			Irssi::print("Prowl debug disabled");
-		} else {
-			$config{debug} = 1;
-			Irssi::print("Prowl debug enabled");
-		}
-	} else {
-		Irssi::print('Prowl: Say what?!');
 	}
 }
 
@@ -215,5 +159,3 @@ Irssi::signal_add_last('proxy client connected', 'client_connect');
 Irssi::signal_add_last('proxy client disconnected', 'client_disconnect');
 Irssi::signal_add_last('message public', 'msg_pub');
 Irssi::signal_add_last('message private', 'msg_pri');
-Irssi::command_bind 'prowl' => \&cmd_prowl;
-Irssi::signal_add_last("print text", "msg_hilight");
