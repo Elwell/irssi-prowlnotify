@@ -5,8 +5,11 @@ use warnings;
 #
 # Version history
 #
+# 0.4
+#	Changed to use the screen_away setting set by;
+#	http://github.com/QuaqSim/irssi-screen_away
 # 0.3
-#       Removed auto_away stuff and changed to check for hilight
+#	Removed auto_away stuff and changed to check for hilight
 # 0.2
 #	Modify to use new API keys, much better!
 # 0.1
@@ -101,6 +104,10 @@ sub msg_pub
 {
 	my ($dest, $text, $stripped) = @_;
 	
+	if (Irssi::settings_get_bool('screen_away_active') == 1 and Irssi::settings_get_bool('screen_away') == 0) {
+		return;
+	}
+
 	if ($dest->{level} & MSGLEVEL_HILIGHT) {
 		send_prowl ("Mention", $stripped);
 	}
@@ -109,6 +116,10 @@ sub msg_pub
 sub msg_pri
 {
 	my ($server, $data, $nick, $address) = @_;
+
+	if (Irssi::settings_get_bool('screen_away_active') == 1 and Irssi::settings_get_bool('screen_away') == 0) {
+		return;
+	}
 
 	if (Irssi::active_win()->get_active_name() ne $nick) {
 		send_prowl ("Private msg", $nick . ': ' . $data);
