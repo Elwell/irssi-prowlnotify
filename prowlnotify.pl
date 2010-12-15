@@ -5,6 +5,10 @@ use warnings;
 #
 # Version history
 #
+# 0.5 
+# 	Merged in the /prowl commands from Dennis with the cleanup
+# 	by QuagSim and added channel info to notifications
+#
 # 0.4
 #	Changed to use the screen_away setting set by;
 #	http://github.com/QuaqSim/irssi-screen_away
@@ -23,7 +27,7 @@ use vars qw($VERSION %IRSSI %config);
 
 use LWP::UserAgent;
 
-$VERSION = "0.3";
+$VERSION = "0.5";
 
 %IRSSI = (
 	authors => "Denis Lemire",
@@ -102,15 +106,16 @@ sub send_prowl
 
 sub msg_pub
 {
-	my ($dest, $text, $stripped) = @_;
+	my ($server, $data, $nick, $mask, $target) = @_;
 	
 	if (Irssi::settings_get_bool('screen_away_active') == 1 and Irssi::settings_get_bool('screen_away') == 0) {
 		return;
 	}
-
-	if ($dest->{level} & MSGLEVEL_HILIGHT) {
-		send_prowl ("Mention", $stripped);
+	if ($data =~ /$server->{nick}/i) {
+		debug("Got pub msg with my name in $target");
+		send_prowl ("Mention $target", $nick . ': ' . $data);
 	}
+
 }
 
 sub msg_pri
@@ -126,5 +131,28 @@ sub msg_pri
 	}
 }
 
-Irssi::signal_add_last('print text', 'msg_pub');
+sub cmd_prowl
+{
+	my ($args, $server, $winit) = @_;
+
+	$args = lc($args);
+
+	if ($args =~/^test$/) {
+		Irssi::print("Sending test prowl notification");
+		send_prowl ("Test", "If you can read this, it worked.");
+	} elsif ($args =~/^debug$/) {
+		if ($config{debug}) {
+			$config{debug} = 0;
+			Irssi::print("Prowl debug disabled");
+		} else {
+			$config{debug} = 1;
+			Irssi::print("Prowl debug enabled");
+		}
+	} else {
+		Irssi::print('Prowl: Say what?!');
+	}
+}
+
+Irssi::command_bind 'prowl' => \&cmd_prowl;
+Irssi::signal_add_last('message public', 'msg_pub');
 Irssi::signal_add_last('message private', 'msg_pri');

@@ -15,3 +15,8 @@ Installation
   2. Copy the script into Irssi's scripts dir (typically ~/.irssi/scripts/)
   3. /script load prowlnotify.pl
 
+
+screen_away
+-----------
+This version of the script depends on the screen_away boolean flag to see if
+it should notify or not. it therefore depends on screen_away.pl
