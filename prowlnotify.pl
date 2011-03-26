@@ -84,7 +84,7 @@ sub send_prowl
 	$userAgent = LWP::UserAgent->new;
 	$userAgent->agent("ProwlScript/1.0");
 
-	$requestURL = "https://prowl.weks.net/publicapi/add";
+	$requestURL = "https://api.prowlapp.com/publicapi/add";
 
 	$request = HTTP::Request->new(POST => $requestURL);
 	$request->content_type('application/x-www-form-urlencoded');
