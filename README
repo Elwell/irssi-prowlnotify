@@ -2,7 +2,7 @@ prowlnotify Irssi Plugin
 ------------------------
 
 prowlnotify is a simple script to send push notifications from Irssi to the
-iPhone via Prowl (http://http://www.prowlapp.com).
+iPhone via Prowl (http://www.prowlapp.com).
 
 It was originally based on BCOW's awayproxy.pl script which automatically marks
 you as away when your last IRC client disconnects from Irssi's proxy. Given my
