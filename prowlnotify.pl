@@ -4,6 +4,7 @@ use warnings;
 #####
 #
 # Version history
+# 0.6 - quick n dirty fork to android. set API in config
 #
 # 0.5 
 # 	Merged in the /prowl commands from Dennis with the cleanup
@@ -30,15 +31,17 @@ use LWP::UserAgent;
 $VERSION = "0.5";
 
 %IRSSI = (
-	authors => "Denis Lemire",
-	contact => "denis\@lemire.name",
+	authors => "Andrew Elwell,Denis Lemire",
+	contact => "Andrew.Elwell\@gmail.com",
 	name => "prowl",
-	description => "Sends messages to an iPhone via prowl.",
+	description => "Sends messages via prowl (iphone) or notify my android",
 	license => "GPLv2",
-	url => "http://www.denis.lemire.name",
+	url => "https://github.com/Elwell/irssi-prowlnotify",
 );
 
 $config{debug} = 0;
+$config{API} = "NMA"; # NMA or prowl
+
 
 sub debug
 {
@@ -62,9 +65,21 @@ sub send_prowl
 	$options{'notification'} = $text;
 	$options{'priority'} ||= 0;
 
+	my ($apikey, $requestURL);
+	if ($config{API} eq "NMA") {
+		$apikey = $ENV{HOME} . "/.NMA_apikey" ;
+		$requestURL = "https://www.notifymyandroid.com/publicapi/notify";
+	} elsif ($config{API} eq "prowl"){
+		$apikey = $ENV{HOME} . "/.prowlkey" ;
+		$requestURL = "https://api.prowlapp.com/publicapi/add";
+	} else {
+		debug("Unsupported API\n");
+	}
+
+
 	# Get the API key from STDIN if one isn't provided via a file or from the command line.
 
-	if (open(APIKEYFILE, $ENV{HOME} . "/.prowlkey")) {
+	if (open(APIKEYFILE, $apikey)) {
 		$options{apikey} = <APIKEYFILE>;
 
 		chomp $options{apikey};
@@ -80,11 +95,10 @@ sub send_prowl
 	$options{'notification'} =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
 
 	# Generate our HTTP request.
-	my ($userAgent, $request, $response, $requestURL);
+	my ($userAgent, $request, $response);
 	$userAgent = LWP::UserAgent->new;
 	$userAgent->agent("ProwlScript/1.0");
 
-	$requestURL = "https://api.prowlapp.com/publicapi/add";
 
 	$request = HTTP::Request->new(POST => $requestURL);
 	$request->content_type('application/x-www-form-urlencoded');
@@ -140,7 +154,7 @@ sub cmd_prowl
 	$args = lc($args);
 
 	if ($args =~/^test$/) {
-		Irssi::print("Sending test prowl notification");
+		Irssi::print("Sending test notification ($config{API})");
 		send_prowl ("Test", "If you can read this, it worked.");
 	} elsif ($args =~/^debug$/) {
 		if ($config{debug}) {
