@@ -138,7 +138,7 @@ sub msg_pri
 {
 	my ($server, $data, $nick, $address) = @_;
 
-	if (Irssi::settings_get_bool('screen_away_active') == 1 and Irssi::settings_get_bool('screen_away') == 0) {
+	if (Irssi::settings_get_bool('screen_away_active') == 1) {
 		return;
 	}
 
