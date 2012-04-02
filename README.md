@@ -25,5 +25,8 @@ it should notify or not. it therefore depends on screen_away.pl
 ## perl dependencies
 The Notify My Android API calls are sent via HTTPS. For this to work you need
 to have IO::Socket::SSL installed:
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
     cpan -i IO::Socket::SSL
