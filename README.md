@@ -11,9 +11,9 @@ flag.
 
 ## Installation
 
-  1. Create a text file containing your API key in either in ~/.prowlkey or ~/.NMI_apikey
+  1. Create a text file containing your API key in either in ~/.prowlkey or ~/.NMA_apikey
   2. Copy the script into Irssi's scripts dir (typically ~/.irssi/scripts/)
-  3. Edit $config{API} = ""; (line 43) to specify prowl or NMI
+  3. Edit $config{API} = ""; (line 43) to specify prowl or NMA
   4. /script load prowlnotify.pl
   5. Send yourself a test message with /prowl test
 
